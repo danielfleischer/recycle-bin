@@ -18,8 +18,8 @@ int tempo = 130;
 // defines variables
 int val = 0;
 int counter = 0;
-const int full_box = 4;
-const int threshold = 40;
+const int full_box = 10;
+const int threshold = 15;
 bool inRange = false;
 
 void playTone(int tone, int duration) {
