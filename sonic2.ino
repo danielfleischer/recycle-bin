@@ -19,7 +19,7 @@ int tempo = 130;
 int val = 0;
 int counter = 0;
 const int full_box = 10;
-const int threshold = 15;
+const int threshold = 30;
 bool inRange = false;
 
 void playTone(int tone, int duration) {
