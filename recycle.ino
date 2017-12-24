@@ -3,6 +3,7 @@
 // defines pins numbers
 const int speakerPin = 3;
 const int buttonPin = 7;
+const int buttonLedPin = 2;
 const int trigPin = 9;
 const int echoPin = 10;
 const int CLK = 12; //Set the CLK pin connection to the display
@@ -19,8 +20,9 @@ int tempo = 130;
 int val = 0;
 int counter = 0;
 const int full_box = 10;
-const int threshold = 30;
+const int threshold = 22;
 bool inRange = false;
+bool buttonState = false;
 
 void playTone(int tone, int duration) {
   for (long i = 0; i < duration * 1000L; i += tone * 2) {
@@ -49,38 +51,41 @@ void setup() {
   Serial.begin(9600); // Starts the serial communication
   display.setBrightness(0x0a);
   pinMode(buttonPin, INPUT);  // declare LED as output
+  pinMode(buttonLedPin, OUTPUT);
   digitalWrite(buttonPin, HIGH);
   pinMode(speakerPin, OUTPUT);
   display.showNumberDec(counter);
 }
 
 void play_melody() {
-    for (int i = 0; i < length; i++) {
-      if (notes[i] == ' ') {
-        delay(beats[i] * tempo); // rest
-      } else {
-        playNote(notes[i], beats[i] * tempo);
-      }
-  
-      // pause between notes
-      delay(tempo / 2); 
+  for (int i = 0; i < length; i++) {
+    if (notes[i] == ' ') {
+  			digitalWrite(buttonLedPin, HIGH);
+      delay(beats[i] * tempo); // rest
+  			digitalWrite(buttonLedPin, LOW);
+    } else {
+      playNote(notes[i], beats[i] * tempo);
     }
+    // pause between notes
+  		digitalWrite(buttonLedPin, HIGH);
+    delay(tempo / 2); 
+  		digitalWrite(buttonLedPin, LOW);
+  }
 }
 
 void something_went_down() {
-      counter ++;
-      tone(speakerPin, 440, 100);
-//      tone(speakerPin, 540, 500);
-//      tone(speakerPin, 640, 500);
-
-      display.showNumberDec(counter);
-      Serial.println("Something went down!");
-      if (counter % full_box == 0) {
-        play_melody();
-      }
-      else {
-        delay(500);
-      }
+  counter ++;
+  tone(speakerPin, 440, 100);
+  display.showNumberDec(counter);
+  Serial.println("Something went down!");
+  if (counter % full_box == 0) {
+    play_melody();
+  }
+  else {
+		digitalWrite(buttonLedPin, HIGH);
+    delay(500);
+    digitalWrite(buttonLedPin, LOW);
+  }
 }
 
 void loop() {
@@ -99,7 +104,19 @@ void loop() {
   Serial.print("Distance: ");
   Serial.println(distance);
 
-  if (digitalRead(buttonPin) == LOW) {
+  int val = digitalRead(buttonPin);
+
+  if (val == LOW && buttonState == false) {
+    buttonState = true;
+    play_melody();
+      digitalWrite(buttonLedPin, HIGH);
+  }
+  if (val == HIGH && buttonState == true) {
+    buttonState = false;
+    digitalWrite(buttonLedPin, LOW);
+  }
+
+  if (val == LOW) {
     counter = 0;
     display.showNumberDec(counter);
   }
@@ -116,4 +133,3 @@ void loop() {
     }
   }
 }
-
